@@ -54,6 +54,29 @@ function Create(props) {
   );
 }
 
+function Update(props) {
+  const [title, setTitle] = useState(props.title);
+  const [body, setBody] = useState(props.body);
+  return (<article>
+    <h2>Update</h2>
+    <form onSubmit={event => {
+      event.preventDefault();  // submit 버튼을 눌렀을 때 페이지 새로고침을 막음
+      const title = event.target.title.value;
+      const body = event.target.body.value;
+      props.onUpdate(title, body);
+    }}>
+      <p><input type='text' name='title' placeholder='title' value={title} onChange={event => {
+        setTitle(event.target.value);  // 가장 최근에 변경된 값을 새로운 값으로 변경
+      }} /></p>
+      <p><textarea name='body' placeholder='body' value={body} onChange={event => {
+        setBody(event.target.value);
+      }} /></p>
+      <p><input type='submit' value='Update' /></p>
+    </form>
+  </article>
+  );
+}
+
 function App() {
   const [mode, setMode] = useState('WELCOME');
   const [id, setId] = useState(null);
@@ -64,18 +87,22 @@ function App() {
     { id: 3, title: 'js', body: 'js is...' },
   ]);  // topics를 변경할 수 있도록 승격시킴
   let content = null;
+  let contextControl = null;  // 맥락적으로 노출되는 UI
   if (mode === 'WELCOME') {
     content = <Article title="Welcome" body="Hello, WEB" />
   } else if (mode === 'READ') {
     let title, body = null;
     for (let i = 0; i < topics.length; i++) {
-      console.log(topics[i].id, id);
       if (topics[i].id === id) {
         title = topics[i].title;
         body = topics[i].body;
       }
     }
     content = <Article title={title} body={body} />
+    contextControl = <li><a href={'/update/' + id} onClick={event => {
+      event.preventDefault();
+      setMode('UPDATE');
+    }}>Update</a></li>
   } else if (mode === 'CREATE') {
     content = <Create onCreate={(_title, _body) => {
       const newTopic = { id: nextId, title: _title, body: _body }
@@ -86,6 +113,26 @@ function App() {
       setId(nextId);  // 생성된 글의 인덱스
       setNextId(nextId + 1);  // 생성된 글의 다음 인덱스
     }}></Create>
+  } else if (mode === 'UPDATE') {
+    let title, body = null;
+    for (let i = 0; i < topics.length; i++) {
+      if (topics[i].id === id) {
+        title = topics[i].title;
+        body = topics[i].body;
+      }
+    }
+    content = <Update title={title} body={body} onUpdate={(title, body) => {
+      const newTopics = [...topics]
+      const updatedTopic = { id: id, title: title, body: body }
+      for(let i = 0; i < newTopics.length; i++) {
+        if(newTopics[i].id === id) {
+          newTopics[i] = updatedTopic
+          break
+        }
+      }
+      setTopics(newTopics);
+      setMode('READ');
+    }}></Update>
   }
   return (
     <div>
@@ -97,10 +144,13 @@ function App() {
         setId(_id);
       }} />  {/* 있는 그대로 전달하기 위해 중괄호({})를 사용 */}
       {content}
-      <a href='/create' onClick={event => {
-        event.preventDefault();
-        setMode('CREATE');
-      }}>Create</a>
+      <ul>
+        <li><a href='/create' onClick={event => {
+          event.preventDefault();
+          setMode('CREATE');
+        }}>Create</a></li>
+        {contextControl}
+      </ul>
     </div>
   );
 }
