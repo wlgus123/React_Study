@@ -1,4 +1,4 @@
-# 📝 React 개발환경
+## 📝 React 개발환경
 1. React 설치: https://ko.legacy.reactjs.org/
 2. node.js 설치: https://nodejs.org/en
 3. create-react-app 사용 (https://create-react-app.dev/)
@@ -7,7 +7,7 @@
    - npx create-react-app [프로젝트명]
    - npm start (또는 yarn start)
 
-# 📝 React 배포하기
+## 📝 React 배포하기
 - vs code 터미널 명령어
 ```
 > npm run build
